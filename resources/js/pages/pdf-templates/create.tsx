@@ -170,7 +170,7 @@ export default function CreateTemplate({ default_category }: { default_category:
                     </Link>
                     <div>
                         <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-700 to-sky-500 dark:from-blue-400 dark:to-sky-400 bg-clip-text text-transparent">
-                            Create PDF Template
+                            Create Quick Docx
                         </h1>
                         <p className="text-xs text-slate-500 dark:text-zinc-400">
                             Build a custom document with dynamic `{"{{variable_name}}"}` placeholders.
@@ -445,7 +445,7 @@ export default function CreateTemplate({ default_category }: { default_category:
 CreateTemplate.layout = {
     breadcrumbs: [
         {
-            title: 'PDF Templates',
+            title: 'Quick Docx',
             href: '/pdf-templates',
         },
         {

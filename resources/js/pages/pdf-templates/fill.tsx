@@ -305,7 +305,7 @@ export default function FillTemplate({ template }: { template: PdfTemplate }) {
 
 FillTemplate.layout = {
     breadcrumbs: [
-        { title: 'PDF Templates', href: '/pdf-templates' },
+        { title: 'Quick Docx', href: '/pdf-templates' },
         { title: 'Fill', href: '/pdf-templates/fill' },
     ],
 };

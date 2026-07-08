@@ -184,7 +184,7 @@ export default function EditTemplate({ template, category_name }: Props) {
                     </Link>
                     <div>
                         <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-700 to-sky-500 dark:from-blue-400 dark:to-sky-400 bg-clip-text text-transparent">
-                            Edit PDF Template
+                            Edit Quick Docx
                         </h1>
                         <p className="text-xs text-slate-500 dark:text-zinc-400">
                             Modify document content and variables configurations.
@@ -459,7 +459,7 @@ export default function EditTemplate({ template, category_name }: Props) {
 EditTemplate.layout = {
     breadcrumbs: [
         {
-            title: 'PDF Templates',
+            title: 'Quick Docx',
             href: '/pdf-templates',
         },
         {

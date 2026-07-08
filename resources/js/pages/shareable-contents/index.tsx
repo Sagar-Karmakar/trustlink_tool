@@ -69,7 +69,7 @@ export default function ShareableContentsIndex({ contents }: { contents: Shareab
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 dark:from-blue-400 dark:via-blue-300 dark:to-sky-400 bg-clip-text text-transparent">
-                                    Manage Quick Shares
+                                    Manage Quick Share
                                 </h1>
                                 <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
                                     Create and manage social media post templates with rich text and images.
@@ -172,7 +172,7 @@ export default function ShareableContentsIndex({ contents }: { contents: Shareab
                                     ) : (
                                         <tr>
                                             <td colSpan={4} className="py-12 text-center text-slate-500 dark:text-zinc-400 font-medium">
-                                                No Quick Shares found. Click "Add Quick Share" to get started!
+                                                No Quick Share posts found. Click "Add Quick Share" to get started!
                                             </td>
                                         </tr>
                                     )}
@@ -237,7 +237,7 @@ export default function ShareableContentsIndex({ contents }: { contents: Shareab
                                 ))
                             ) : (
                                 <div className="py-8 text-center text-slate-500 dark:text-zinc-400 font-medium">
-                                    No Quick Shares found. Click "Add Quick Share" to get started!
+                                    No Quick Share posts found. Click "Add Quick Share" to get started!
                                 </div>
                             )}
                         </div>

@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Trustlink';
+const appName = import.meta.env.VITE_APP_NAME || 'TrustGenie';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

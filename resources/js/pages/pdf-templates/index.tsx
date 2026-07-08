@@ -97,7 +97,7 @@ export default function TemplatesIndex({ categories, templates, category }: Prop
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 dark:from-blue-400 dark:via-blue-300 dark:to-sky-400 bg-clip-text text-transparent capitalize">
-                                {isFiltered ? `${category.name} Templates` : 'PDF Template Categories'}
+                                {isFiltered ? `${category.name} Documents` : 'Quick Docx Categories'}
                             </h1>
                             <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
                                 {isFiltered 
@@ -197,7 +197,7 @@ export default function TemplatesIndex({ categories, templates, category }: Prop
                                         {filteredTemplates.length === 0 ? (
                                             <tr>
                                                 <td colSpan={4} className="py-12 text-center text-slate-400 dark:text-zinc-500">
-                                                    No PDF templates found in this category.
+                                                    No Quick Docx templates found in this category.
                                                 </td>
                                             </tr>
                                         ) : (
@@ -286,7 +286,7 @@ export default function TemplatesIndex({ categories, templates, category }: Prop
                             <div className="grid grid-cols-1 gap-4 md:hidden p-5">
                                 {filteredTemplates.length === 0 ? (
                                     <div className="py-8 text-center text-slate-400 dark:text-zinc-500">
-                                        No PDF templates found in this category.
+                                        No Quick Docx templates found in this category.
                                     </div>
                                 ) : (
                                     filteredTemplates.map((template) => {
@@ -396,7 +396,7 @@ export default function TemplatesIndex({ categories, templates, category }: Prop
 TemplatesIndex.layout = {
     breadcrumbs: [
         {
-            title: 'PDF Templates',
+            title: 'Quick Docx',
             href: '/pdf-templates',
         },
     ],

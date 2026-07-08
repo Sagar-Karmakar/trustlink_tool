@@ -87,7 +87,7 @@ export default function PublicIndex({ categories = [], contents = [], category =
 
     return (
         <div className="relative min-h-[calc(100vh-8rem)] w-full overflow-hidden rounded-2xl p-4 sm:p-6 bg-slate-950/5 text-slate-900 dark:text-zinc-100">
-            <Head title="Quick Shares" />
+            <Head title="Quick Share" />
 
             {/* Ambient Background Glowing Blobs */}
             <div className="absolute -top-16 -left-16 w-64 sm:w-96 h-64 sm:h-96 rounded-full bg-blue-600/15 dark:bg-blue-600/10 blur-3xl pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />

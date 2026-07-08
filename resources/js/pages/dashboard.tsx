@@ -91,7 +91,7 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                             Welcome back, {auth.user.name}!
                         </h1>
                         <p className="text-sm text-blue-100 dark:text-zinc-400 font-medium">
-                            Here is a quick overview of your Trustlink Portal operations today.
+                            Here is a quick overview of your TrustGenie Portal operations today.
                         </p>
                     </div>
 
@@ -136,7 +136,7 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                         <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/15 transition-all" />
                         <CardHeader className="p-5 pb-2">
                             <CardDescription className="text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-zinc-450 flex items-center justify-between">
-                                <span>PDF Generators</span>
+                                <span>Quick Docx</span>
                                 <FileText className="h-4.5 w-4.5 text-indigo-500" />
                             </CardDescription>
                         </CardHeader>
@@ -145,7 +145,7 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                                 {stats.templates_count}
                             </div>
                             <div className="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-1">
-                                Active A4 PDF form templates
+                                Active A4 template forms
                             </div>
                         </CardContent>
                     </Card>
@@ -183,7 +183,7 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                                     Standard Account
                                 </div>
                                 <div className="text-xs text-slate-500 dark:text-zinc-400 font-medium mt-2">
-                                    Access to templates & quick shares
+                                    Access to Quick Docx & Quick Share templates
                                 </div>
                             </CardContent>
                         </Card>
@@ -254,9 +254,9 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                             <div>
                                 <CardTitle className="text-base font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-2">
                                     <FileText className="h-4 w-4 text-indigo-500" />
-                                    Recent PDF Templates
+                                    Recent Quick Docx
                                 </CardTitle>
-                                <CardDescription className="text-xs mt-0.5">Fill details and generate dynamic print PDF files.</CardDescription>
+                                <CardDescription className="text-xs mt-0.5">Fill details and generate dynamic print documents.</CardDescription>
                             </div>
                             <Link href="/pdf-templates">
                                 <Button variant="ghost" size="sm" className="text-xs font-semibold gap-1 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600/10">
@@ -295,7 +295,7 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                                 ))
                             ) : (
                                 <div className="py-8 text-center text-xs text-slate-500 dark:text-zinc-500 font-medium">
-                                    No PDF templates available.
+                                    No Quick Docx templates available.
                                 </div>
                             )}
                         </CardContent>
@@ -313,14 +313,14 @@ export default function Dashboard({ stats, recentShares, recentTemplates }: Dash
                         {/* Action 1: Browse shares */}
                         <Link href="/contents" className="block p-4 rounded-xl border border-zinc-200/50 dark:border-zinc-850 bg-zinc-500/5 hover:bg-zinc-500/10 dark:hover:bg-zinc-900/50 hover:shadow transition-all group">
                             <Share2 className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
-                            <div className="font-semibold text-sm text-slate-800 dark:text-zinc-200 mt-2">Quick Shares</div>
+                            <div className="font-semibold text-sm text-slate-800 dark:text-zinc-200 mt-2">Quick Share</div>
                             <div className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Find & share content</div>
                         </Link>
 
                         {/* Action 2: PDF templates */}
                         <Link href="/pdf-templates" className="block p-4 rounded-xl border border-zinc-200/50 dark:border-zinc-850 bg-zinc-500/5 hover:bg-zinc-500/10 dark:hover:bg-zinc-900/50 hover:shadow transition-all group">
                             <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-200" />
-                            <div className="font-semibold text-sm text-slate-800 dark:text-zinc-200 mt-2">PDF Templates</div>
+                            <div className="font-semibold text-sm text-slate-800 dark:text-zinc-200 mt-2">Quick Docx</div>
                             <div className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">Fill & generate documents</div>
                         </Link>
 

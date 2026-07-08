@@ -1,0 +1,1 @@
+import{n as e,t}from"./jsx-runtime-Coeb5PJV.js";import n from"./show-Bhc4Nb0N.js";var r=e(),i=t();function a(e){let t=(0,r.c)(2),{contentItem:a}=e,o;return t[0]===a?o=t[1]:(o=(0,i.jsx)(n,{contentItem:a,isPublic:!0}),t[0]=a,t[1]=o),o}export{a as default};

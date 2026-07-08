@@ -524,7 +524,7 @@ export default function ShareableContentShow({ contentItem, isPublic }: ShowProp
 ShareableContentShow.layout = {
     breadcrumbs: [
         {
-            title: 'Quick Shares',
+            title: 'Quick Share',
             href: '/contents',
         },
         {

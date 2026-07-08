@@ -27,12 +27,12 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
-            title: 'Quick Shares',
+            title: 'Quick Share',
             href: '/contents',
             icon: Share2,
         },
         {
-            title: 'PDF Templates',
+            title: 'Quick Docx',
             href: '/pdf-templates',
             icon: FileText,
         },
