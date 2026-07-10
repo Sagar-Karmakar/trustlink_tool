@@ -144,7 +144,7 @@ export default function ShareableContentForm({ contentItem, isEdit, category_nam
                     {/* Left Panel: Inputs (Title & Image) */}
                     <div className="md:col-span-1 space-y-6">
                         <div className="bg-white/45 dark:bg-zinc-950/45 backdrop-blur-xl border border-white/20 dark:border-zinc-800/40 p-4 sm:p-6 rounded-2xl shadow-lg space-y-5">
-                            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Content Details</h2>
+                            <h2 className="text-sm font-semibold tracking-wider text-slate-500 dark:text-zinc-400">Content Details</h2>
                             
                             {/* Title Field */}
                             <div className="space-y-2">

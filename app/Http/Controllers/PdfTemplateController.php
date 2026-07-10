@@ -188,7 +188,6 @@ class PdfTemplateController extends Controller
             return $html;
         }
 
-        $appUrl    = rtrim(config('app.url'), '/');
         $publicDir = public_path();
 
         // Wrap in a div so DOMDocument doesn't add <html>/<body> wrappers
@@ -213,23 +212,57 @@ class PdfTemplateController extends Controller
                 continue;
             }
 
-            // Extract relative filename if under uploads directory, otherwise check relative to public root
+            // 1. Try local filesystem path
+            $filePath = null;
             if (preg_match('/\/uploads\/(.+)$/i', $path, $matches)) {
                 $filePath = $publicDir . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
             } else {
                 $filePath = $publicDir . DIRECTORY_SEPARATOR . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
             }
-
-            // Normalise path and check existence
             $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
 
-            if (!file_exists($filePath)) {
-                continue;
+            $base64 = null;
+            $mimeType = null;
+
+            if (file_exists($filePath) && is_readable($filePath)) {
+                $mimeType = mime_content_type($filePath);
+                $fileData = @file_get_contents($filePath);
+                if ($fileData !== false) {
+                    $base64 = base64_encode($fileData);
+                }
             }
 
-            $mimeType = mime_content_type($filePath);
-            $base64   = base64_encode(file_get_contents($filePath));
-            $img->setAttribute('src', "data:{$mimeType};base64,{$base64}");
+            // 2. Fallback: If local file not found or unreadable, fetch via HTTP/HTTPS
+            if (!$base64) {
+                $absoluteUrl = $src;
+                // If it's a relative URL, prepend config('app.url')
+                if (!str_starts_with($src, 'http://') && !str_starts_with($src, 'https://')) {
+                    $absoluteUrl = rtrim(config('app.url'), '/') . '/' . ltrim($src, '/');
+                }
+
+                // Fetch remote content with timeout and stream context to avoid blocking indefinitely
+                $context = stream_context_create([
+                    'http' => ['timeout' => 5],
+                    'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false] // Ignore self-signed ssl issues on local/staging
+                ]);
+                $fileData = @file_get_contents($absoluteUrl, false, $context);
+                if ($fileData !== false) {
+                    $base64 = base64_encode($fileData);
+                    // Infer mime type from extension or fallback
+                    $ext = strtolower(pathinfo(parse_url($absoluteUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
+                    $mimeType = match($ext) {
+                        'png'  => 'image/png',
+                        'gif'  => 'image/gif',
+                        'webp' => 'image/webp',
+                        default=> 'image/jpeg',
+                    };
+                }
+            }
+
+            // If we successfully got base64 data, embed it!
+            if ($base64 && $mimeType) {
+                $img->setAttribute('src', "data:{$mimeType};base64,{$base64}");
+            }
 
             // Also clear data-mce-src so it doesn't confuse anything
             if ($img->hasAttribute('data-mce-src')) {
@@ -263,12 +296,63 @@ class PdfTemplateController extends Controller
         $bodyHtml = preg_replace('/align-(?:items|content|self)\s*:[^;";]+;?/i', '', $bodyHtml);
         $bodyHtml = preg_replace('/justify-(?:content|items|self)\s*:[^;";]+;?/i', '', $bodyHtml);
 
+        // Ensure storage/fonts directory exists for Dompdf font cache
+        $storageFonts = storage_path('fonts');
+        if (!file_exists($storageFonts)) {
+            @mkdir($storageFonts, 0755, true);
+        }
+
+        // Define local Calibri font paths
+        $calibri = str_replace('\\', '/', public_path('fonts/calibri.ttf'));
+        $calibriBold = str_replace('\\', '/', public_path('fonts/calibrib.ttf'));
+        $calibriItalic = str_replace('\\', '/', public_path('fonts/calibrii.ttf'));
+        $calibriBoldItalic = str_replace('\\', '/', public_path('fonts/calibriz.ttf'));
+        $calibriLight = str_replace('\\', '/', public_path('fonts/calibril.ttf'));
+        $calibriLightItalic = str_replace('\\', '/', public_path('fonts/calibrili.ttf'));
+
         return '
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
             <style>
+                @font-face {
+                    font-family: "Calibri";
+                    src: url("' . $calibri . '") format("truetype");
+                    font-weight: normal;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: "Calibri";
+                    src: url("' . $calibriBold . '") format("truetype");
+                    font-weight: bold;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: "Calibri";
+                    src: url("' . $calibriItalic . '") format("truetype");
+                    font-weight: normal;
+                    font-style: italic;
+                }
+                @font-face {
+                    font-family: "Calibri";
+                    src: url("' . $calibriBoldItalic . '") format("truetype");
+                    font-weight: bold;
+                    font-style: italic;
+                }
+                @font-face {
+                    font-family: "Calibri";
+                    src: url("' . $calibriLight . '") format("truetype");
+                    font-weight: 300;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: "Calibri";
+                    src: url("' . $calibriLightItalic . '") format("truetype");
+                    font-weight: 300;
+                    font-style: italic;
+                }
+
                 @page {
                     margin: 20mm 18mm 20mm 18mm;
                     size: A4 portrait;
@@ -281,9 +365,9 @@ class PdfTemplateController extends Controller
                 }
 
                 body {
-                    font-family: DejaVu Sans, sans-serif;
-                    font-size: 13px;
-                    line-height: 1.5;
+                    font-family: "Calibri", "DejaVu Sans", sans-serif;
+                    font-size: 11px;
+                    line-height: 1.4;
                     color: #000;
                 }
 
@@ -419,7 +503,9 @@ class PdfTemplateController extends Controller
         $htmlContent = $this->embedImages($htmlContent);
 
         $pdf = Pdf::loadHTML($this->buildDocument($htmlContent))
-                  ->setPaper('A4', 'portrait');
+                  ->setPaper('A4', 'portrait')
+                  ->setOption('isRemoteEnabled', true)
+                  ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->download(slugify($pdfTemplate->name) . '_' . time() . '.pdf');
     }
@@ -447,7 +533,9 @@ class PdfTemplateController extends Controller
         $htmlContent = $this->embedImages($htmlContent);
 
         $pdf = Pdf::loadHTML($this->buildDocument($htmlContent))
-                  ->setPaper('A4', 'portrait');
+                  ->setPaper('A4', 'portrait')
+                  ->setOption('isRemoteEnabled', true)
+                  ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->stream('preview.pdf');
     }
@@ -501,7 +589,9 @@ class PdfTemplateController extends Controller
         $htmlContent = $this->embedImages($htmlContent);
 
         $pdf = Pdf::loadHTML($this->buildDocument($htmlContent))
-                  ->setPaper('A4', 'portrait');
+                  ->setPaper('A4', 'portrait')
+                  ->setOption('isRemoteEnabled', true)
+                  ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->stream('preview.pdf');
     }

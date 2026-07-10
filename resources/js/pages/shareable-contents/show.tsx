@@ -46,6 +46,119 @@ export default function ShareableContentShow({ contentItem, isPublic }: ShowProp
         return doc.body.textContent || "";
     };
 
+    // Helper to convert rich HTML text to WhatsApp markdown styling
+    const htmlToWhatsApp = (html: string | null): string => {
+        if (!html) return '';
+
+        console.log('[htmlToWhatsApp] Parsing input HTML:', html);
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const blockTags = ['body', 'div', 'p', 'blockquote', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+
+        const convertNode = (node: Node, listState: { type: 'ul' | 'ol' | null; index: number } = { type: null, index: 0 }): string => {
+            if (node.nodeType === 3) { // TEXT_NODE
+                const text = node.textContent || '';
+                const parentName = node.parentNode?.nodeName.toLowerCase() || '';
+                // Filter out formatting whitespace newlines between block elements
+                if (blockTags.includes(parentName) && !text.trim()) {
+                    return '';
+                }
+                return text;
+            }
+
+            if (node.nodeType === 1) { // ELEMENT_NODE
+                const element = node as Element;
+                const tagName = element.tagName.toLowerCase();
+                
+                let childrenText = '';
+                let currentListState = listState;
+                
+                if (tagName === 'ul' || tagName === 'ol') {
+                    currentListState = { type: tagName as 'ul' | 'ol', index: 0 };
+                }
+
+                element.childNodes.forEach((child) => {
+                    // Ignore whitespace text nodes directly inside list wrappers
+                    if ((tagName === 'ul' || tagName === 'ol') && child.nodeType === 3 && !child.textContent?.trim()) {
+                        return;
+                    }
+                    if (tagName === 'ol' && child.nodeType === 1) {
+                        currentListState = { type: 'ol', index: currentListState.index + 1 };
+                    }
+                    childrenText += convertNode(child, currentListState);
+                });
+
+                switch (tagName) {
+                    // Inline bold, italic, strikethrough, code
+                    case 'strong':
+                    case 'b':
+                        return childrenText.trim() ? `*${childrenText.trim()}*` : '';
+                    case 'em':
+                    case 'i':
+                        return childrenText.trim() ? `_${childrenText.trim()}_` : '';
+                    case 'strike':
+                    case 'del':
+                    case 's':
+                        return childrenText.trim() ? `~${childrenText.trim()}~` : '';
+                    case 'code':
+                        return childrenText.trim() ? `\`${childrenText.trim()}\`` : '';
+                    case 'pre':
+                        return childrenText.trim() ? `\`\`\`\n${childrenText}\n\`\`\`` : '';
+
+                    // Lists
+                    case 'li':
+                        if (listState.type === 'ol') {
+                            return `${listState.index}. ${childrenText.trim()}\n`;
+                        }
+                        return `- ${childrenText.trim()}\n`;
+                    case 'ul':
+                    case 'ol':
+                        return `\n${childrenText.trim()}\n`;
+
+                    // Block breaks
+                    case 'p':
+                    case 'div':
+                        return `\n${childrenText}\n`;
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                    case 'h4':
+                    case 'h5':
+                    case 'h6':
+                        return `\n*${childrenText.trim()}*\n`;
+                    case 'br':
+                        return '\n';
+                    case 'blockquote':
+                        return `\n${childrenText
+                            .split('\n')
+                            .map(line => line.trim())
+                            .filter(Boolean)
+                            .map(line => `> ${line}`)
+                            .join('\n')}\n`;
+
+                    default:
+                        return childrenText;
+                }
+            }
+
+            return '';
+        };
+
+        let result = '';
+        doc.body.childNodes.forEach((child) => {
+            result += convertNode(child);
+        });
+
+        const formattedResult = result
+            .replace(/\r\n/g, '\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+
+        console.log('[htmlToWhatsApp] Output Markdown:', formattedResult);
+        return formattedResult;
+    };
+
     const fallbackCopyText = (text: string, successMsg?: string) => {
         try {
             const textArea = document.createElement("textarea");
@@ -121,7 +234,7 @@ export default function ShareableContentShow({ contentItem, isPublic }: ShowProp
     };
 
     const handleCopyAllForWhatsApp = async () => {
-        const plainText = stripHtml(contentItem.content);
+        const plainText = htmlToWhatsApp(contentItem.content);
         const htmlText = contentItem.content || '';
 
         // For WhatsApp share, copy the PNG image and plain-text (without rich HTML format)
@@ -302,7 +415,7 @@ export default function ShareableContentShow({ contentItem, isPublic }: ShowProp
         // Attempt plain-text + image copy operation (no HTML formatting)
         await handleCopyAllForWhatsApp();
         
-        const plainText = stripHtml(contentItem.content);
+        const plainText = htmlToWhatsApp(contentItem.content);
         const textMessage = `${contentItem.title}\n\n${plainText}\n\nView details: ${getShareUrl()}`;
         const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textMessage)}`;
         
@@ -395,7 +508,7 @@ export default function ShareableContentShow({ contentItem, isPublic }: ShowProp
                             </Button>
                         </Link>
                         <div className="min-w-0">
-                            <span className="text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10 dark:bg-blue-500/20 px-2 py-0.5 rounded">Quick Share view</span>
+                            <span className="text-[10px] tracking-wider text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10 dark:bg-blue-500/20 px-2 py-0.5 rounded">Quick Share view</span>
                             <h1 className="text-base sm:text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100 mt-1 truncate">
                                 {contentItem.title}
                             </h1>
@@ -457,7 +570,7 @@ export default function ShareableContentShow({ contentItem, isPublic }: ShowProp
                     <div className="md:col-span-1 space-y-6">
                         <div className="bg-white/45 dark:bg-zinc-950/45 backdrop-blur-xl border border-white/20 dark:border-zinc-800/40 p-4 sm:p-6 rounded-2xl shadow-lg space-y-6">
                             <div>
-                                <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Share Actions</h2>
+                                <h2 className="text-sm font-semibold tracking-wider text-slate-500 dark:text-zinc-400">Share Actions</h2>
                                 <p className="text-xs text-slate-400 dark:text-zinc-500 mt-0.5">Copy assets individually or post directly.</p>
                             </div>
 
