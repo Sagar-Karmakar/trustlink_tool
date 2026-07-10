@@ -9,24 +9,35 @@ export default function AppSidebarLayout({
     breadcrumbs = [],
 }: AppLayoutProps) {
     return (
-        <AppShell variant="sidebar" className="relative min-h-screen w-full overflow-x-hidden">
+        <AppShell
+            variant="sidebar"
+            className="relative min-h-screen w-full overflow-x-hidden"
+        >
             {/* Global Ambient Background Glowing Blobs for Glassmorphism */}
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full bg-blue-600/8 dark:bg-blue-600/4 blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-sky-500/8 dark:bg-sky-500/4 blur-3xl pointer-events-none" />
-            
+            <div className="pointer-events-none absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-blue-600/8 blur-3xl dark:bg-blue-600/4" />
+            <div className="pointer-events-none absolute right-0 bottom-0 h-[500px] w-[500px] rounded-full bg-sky-500/8 blur-3xl dark:bg-sky-500/4" />
+
             <AppSidebar />
-            <AppContent variant="sidebar" className="overflow-x-hidden relative z-10 flex flex-col min-h-screen">
+            <AppContent
+                variant="sidebar"
+                className="relative z-10 flex min-h-screen flex-col overflow-x-hidden"
+            >
                 <div className="flex-1 pb-10">
                     <AppSidebarHeader breadcrumbs={breadcrumbs} />
                     {children}
                 </div>
-                <footer className="py-5 px-6 text-xs text-slate-500 dark:text-zinc-500 border-t border-zinc-200/50 dark:border-zinc-800/40 bg-white/30 dark:bg-zinc-950/20 backdrop-blur-sm mt-auto">
-                    <div className="mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl">
+                <footer className="mt-auto border-t border-zinc-200/50 bg-white/30 px-6 py-5 text-xs text-slate-500 backdrop-blur-sm dark:border-zinc-800/40 dark:bg-zinc-950/20 dark:text-zinc-500">
+                    <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
                         <span>
-                            &copy; {new Date().getFullYear()} Transource Business Solutions Private Limited. All rights reserved.
+                            &copy; {new Date().getFullYear()} Transource
+                            Business Solutions Private Limited. All rights
+                            reserved.
                         </span>
                         <span>
-                            Built by <span className="font-semibold text-blue-600 dark:text-blue-400">Sagar</span>
+                            Built by{' '}
+                            <span className="font-semibold text-blue-600 dark:text-blue-400">
+                                Sagar
+                            </span>
                         </span>
                     </div>
                 </footer>

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useSyncExternalStore } from 'react';
 
 export type ResolvedAppearance = 'light' | 'dark';

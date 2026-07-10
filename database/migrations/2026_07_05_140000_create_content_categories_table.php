@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -18,7 +18,7 @@ return new class extends Migration
                 // Check if foreign key exists before dropping
                 try {
                     $table->dropForeign(['category_id']);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // Ignore if constraint doesn't exist
                 }
                 $table->dropColumn('category_id');
@@ -42,7 +42,7 @@ return new class extends Migration
         ]);
 
         // 4. Add category_id foreign key referencing content_categories table
-        Schema::table('shareable_contents', function (Blueprint $table) use ($uncatId) {
+        Schema::table('shareable_contents', function (Blueprint $table) {
             $table->foreignId('category_id')->nullable()->after('id')->constrained('content_categories')->nullOnDelete();
         });
 

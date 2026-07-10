@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ShareableContent;
 use App\Models\ContentCategory;
-use Illuminate\Support\Str;
+use App\Models\ShareableContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\File;
 
 class ShareableContentController extends Controller
 {
@@ -63,15 +63,15 @@ class ShareableContentController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
 
             // Ensure public/uploads exists
-            if (!file_exists(public_path('uploads'))) {
+            if (! file_exists(public_path('uploads'))) {
                 mkdir(public_path('uploads'), 0755, true);
             }
 
             $file->move(public_path('uploads'), $filename);
-            $validated['image_path'] = '/uploads/' . $filename;
+            $validated['image_path'] = '/uploads/'.$filename;
         }
 
         ShareableContent::create($validated);
@@ -90,6 +90,7 @@ class ShareableContentController extends Controller
     public function edit(ShareableContent $shareableContent): Response
     {
         $shareableContent->load('category');
+
         return Inertia::render('shareable-contents/form', [
             'contentItem' => $shareableContent,
             'isEdit' => true,
@@ -131,15 +132,15 @@ class ShareableContentController extends Controller
             }
 
             $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
 
             // Ensure public/uploads exists
-            if (!file_exists(public_path('uploads'))) {
+            if (! file_exists(public_path('uploads'))) {
                 mkdir(public_path('uploads'), 0755, true);
             }
 
             $file->move(public_path('uploads'), $filename);
-            $validated['image_path'] = '/uploads/' . $filename;
+            $validated['image_path'] = '/uploads/'.$filename;
         }
 
         $shareableContent->update($validated);
@@ -184,10 +185,11 @@ class ShareableContentController extends Controller
 
         if ($categorySlug) {
             $category = ContentCategory::where('slug', $categorySlug)->first();
-            if (!$category) {
+            if (! $category) {
                 return to_route('shareable-contents.public-index');
             }
             $contents = ShareableContent::with('category')->where('category_id', $category->id)->latest()->get();
+
             return Inertia::render('shareable-contents/public-index', [
                 'contents' => $contents,
                 'category' => $category,
@@ -197,6 +199,7 @@ class ShareableContentController extends Controller
 
         // Default: show categories grid view
         $categories = ContentCategory::withCount('shareableContents')->get();
+
         return Inertia::render('shareable-contents/public-index', [
             'categories' => $categories,
             'contents' => [],
@@ -210,6 +213,7 @@ class ShareableContentController extends Controller
     public function show(ShareableContent $shareableContent): Response
     {
         $shareableContent->load('category');
+
         return Inertia::render('shareable-contents/show', [
             'contentItem' => $shareableContent,
             'isPublic' => false,
@@ -245,6 +249,7 @@ class ShareableContentController extends Controller
     {
         $query = $request->query('query');
         $categories = ContentCategory::where('name', 'like', "%{$query}%")->pluck('name');
+
         return response()->json($categories);
     }
 }

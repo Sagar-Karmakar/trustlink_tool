@@ -43,15 +43,15 @@ class ProfileController extends Controller
             }
 
             $file = $request->file('avatar');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+
             // Ensure destination directory exists
-            if (!file_exists(public_path('uploads/avatars'))) {
+            if (! file_exists(public_path('uploads/avatars'))) {
                 mkdir(public_path('uploads/avatars'), 0755, true);
             }
-            
+
             $file->move(public_path('uploads/avatars'), $filename);
-            $data['avatar'] = '/uploads/avatars/' . $filename;
+            $data['avatar'] = '/uploads/avatars/'.$filename;
         }
 
         $user->fill($data);

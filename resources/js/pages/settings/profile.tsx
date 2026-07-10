@@ -1,5 +1,7 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
+import { Upload } from 'lucide-react';
+import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -9,8 +11,6 @@ import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { Auth } from '@/types';
-import { useState } from 'react';
-import { Upload } from 'lucide-react';
 
 type PageProps = {
     auth: Auth;
@@ -24,10 +24,13 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage<PageProps>().props;
-    const [avatarPreview, setAvatarPreview] = useState<string | null>(auth.user.avatar || null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(
+        auth.user.avatar || null,
+    );
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setAvatarPreview(URL.createObjectURL(file));
         }
@@ -56,20 +59,26 @@ export default function Profile({
                     {({ processing, errors }) => (
                         <>
                             {/* Profile Picture Upload Section */}
-                            <div className="flex items-center gap-5 bg-neutral-500/5 dark:bg-zinc-900/40 p-4 rounded-xl border border-zinc-200/50 dark:border-zinc-800/40">
-                                <div className="relative group">
-                                    <div className="size-16 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-neutral-100 dark:bg-zinc-900 flex items-center justify-center shadow-inner">
+                            <div className="flex items-center gap-5 rounded-xl border border-zinc-200/50 bg-neutral-500/5 p-4 dark:border-zinc-800/40 dark:bg-zinc-900/40">
+                                <div className="group relative">
+                                    <div className="flex size-16 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-neutral-100 shadow-inner dark:border-zinc-800 dark:bg-zinc-900">
                                         {avatarPreview ? (
-                                            <img src={avatarPreview} alt="Avatar" className="size-full object-cover" />
+                                            <img
+                                                src={avatarPreview}
+                                                alt="Avatar"
+                                                className="size-full object-cover"
+                                            />
                                         ) : (
                                             <span className="text-xl font-bold text-neutral-500 dark:text-zinc-400">
-                                                {auth.user.name.charAt(0).toUpperCase()}
+                                                {auth.user.name
+                                                    .charAt(0)
+                                                    .toUpperCase()}
                                             </span>
                                         )}
                                     </div>
-                                    <label 
-                                        htmlFor="avatar-upload" 
-                                        className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                                    <label
+                                        htmlFor="avatar-upload"
+                                        className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
                                     >
                                         <Upload className="size-5 text-white" />
                                     </label>
@@ -83,7 +92,10 @@ export default function Profile({
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="avatar-upload" className="cursor-pointer font-bold text-slate-700 dark:text-zinc-300 text-sm">
+                                    <Label
+                                        htmlFor="avatar-upload"
+                                        className="cursor-pointer text-sm font-bold text-slate-700 dark:text-zinc-300"
+                                    >
                                         Profile Photo
                                     </Label>
                                     <p className="text-xs text-slate-400 dark:text-zinc-500">

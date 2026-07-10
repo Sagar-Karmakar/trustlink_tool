@@ -108,6 +108,7 @@ class UserController extends Controller
                 'type' => 'error',
                 'message' => __('You cannot delete your own account.'),
             ]);
+
             return back();
         }
 
@@ -131,10 +132,11 @@ class UserController extends Controller
                 'type' => 'error',
                 'message' => __('You cannot suspend your own account.'),
             ]);
+
             return back();
         }
 
-        $user->is_suspended = !$user->is_suspended;
+        $user->is_suspended = ! $user->is_suspended;
         $user->save();
 
         $statusMessage = $user->is_suspended ? __('User suspended successfully.') : __('User unsuspended successfully.');

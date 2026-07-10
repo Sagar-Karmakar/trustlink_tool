@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        if (!User::where('email', 'transource.hr@gmail.com')->exists()) {
+        if (! User::where('email', 'transource.hr@gmail.com')->exists()) {
             User::create([
                 'name' => 'Admin User',
                 'email' => 'transource.hr@gmail.com',
@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        if (!User::where('email', 'admin@example.com')->exists()) {
+        if (! User::where('email', 'admin@example.com')->exists()) {
             User::create([
                 'name' => 'System Admin',
                 'email' => 'admin@example.com',

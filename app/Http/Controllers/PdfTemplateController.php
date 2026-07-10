@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PdfTemplate;
 use App\Models\Category;
-use Illuminate\Support\Str;
+use App\Models\PdfTemplate;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
@@ -26,10 +26,11 @@ class PdfTemplateController extends Controller
 
         if ($categorySlug) {
             $category = Category::where('slug', $categorySlug)->first();
-            if (!$category) {
+            if (! $category) {
                 return to_route('pdf-templates.index');
             }
             $templates = PdfTemplate::with('category')->where('category_id', $category->id)->latest()->get();
+
             return Inertia::render('pdf-templates/index', [
                 'templates' => $templates,
                 'category' => $category,
@@ -39,6 +40,7 @@ class PdfTemplateController extends Controller
 
         // Default: show categories grid view
         $categories = Category::withCount('pdfTemplates')->get();
+
         return Inertia::render('pdf-templates/index', [
             'categories' => $categories,
             'templates' => [],
@@ -96,6 +98,7 @@ class PdfTemplateController extends Controller
     public function edit(PdfTemplate $pdfTemplate): InertiaResponse
     {
         $pdfTemplate->load('category');
+
         return Inertia::render('pdf-templates/edit', [
             'template' => $pdfTemplate,
             'category_name' => $pdfTemplate->category ? $pdfTemplate->category->name : 'uncategory',
@@ -191,11 +194,11 @@ class PdfTemplateController extends Controller
         $publicDir = public_path();
 
         // Wrap in a div so DOMDocument doesn't add <html>/<body> wrappers
-        $wrapped = '<div id="__wrap__">' . $html . '</div>';
+        $wrapped = '<div id="__wrap__">'.$html.'</div>';
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $dom->loadHTML('<?xml encoding="UTF-8">'.$wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         foreach ($dom->getElementsByTagName('img') as $img) {
@@ -215,9 +218,9 @@ class PdfTemplateController extends Controller
             // 1. Try local filesystem path
             $filePath = null;
             if (preg_match('/\/uploads\/(.+)$/i', $path, $matches)) {
-                $filePath = $publicDir . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
+                $filePath = $publicDir.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
             } else {
-                $filePath = $publicDir . DIRECTORY_SEPARATOR . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+                $filePath = $publicDir.DIRECTORY_SEPARATOR.ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
             }
             $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
 
@@ -233,28 +236,28 @@ class PdfTemplateController extends Controller
             }
 
             // 2. Fallback: If local file not found or unreadable, fetch via HTTP/HTTPS
-            if (!$base64) {
+            if (! $base64) {
                 $absoluteUrl = $src;
                 // If it's a relative URL, prepend config('app.url')
-                if (!str_starts_with($src, 'http://') && !str_starts_with($src, 'https://')) {
-                    $absoluteUrl = rtrim(config('app.url'), '/') . '/' . ltrim($src, '/');
+                if (! str_starts_with($src, 'http://') && ! str_starts_with($src, 'https://')) {
+                    $absoluteUrl = rtrim(config('app.url'), '/').'/'.ltrim($src, '/');
                 }
 
                 // Fetch remote content with timeout and stream context to avoid blocking indefinitely
                 $context = stream_context_create([
                     'http' => ['timeout' => 5],
-                    'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false] // Ignore self-signed ssl issues on local/staging
+                    'ssl' => ['verify_peer' => false, 'verify_peer_name' => false], // Ignore self-signed ssl issues on local/staging
                 ]);
                 $fileData = @file_get_contents($absoluteUrl, false, $context);
                 if ($fileData !== false) {
                     $base64 = base64_encode($fileData);
                     // Infer mime type from extension or fallback
                     $ext = strtolower(pathinfo(parse_url($absoluteUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
-                    $mimeType = match($ext) {
-                        'png'  => 'image/png',
-                        'gif'  => 'image/gif',
+                    $mimeType = match ($ext) {
+                        'png' => 'image/png',
+                        'gif' => 'image/gif',
                         'webp' => 'image/webp',
-                        default=> 'image/jpeg',
+                        default => 'image/jpeg',
                     };
                 }
             }
@@ -298,7 +301,7 @@ class PdfTemplateController extends Controller
 
         // Ensure storage/fonts directory exists for Dompdf font cache
         $storageFonts = storage_path('fonts');
-        if (!file_exists($storageFonts)) {
+        if (! file_exists($storageFonts)) {
             @mkdir($storageFonts, 0755, true);
         }
 
@@ -318,37 +321,37 @@ class PdfTemplateController extends Controller
             <style>
                 @font-face {
                     font-family: "Calibri";
-                    src: url("' . $calibri . '") format("truetype");
+                    src: url("'.$calibri.'") format("truetype");
                     font-weight: normal;
                     font-style: normal;
                 }
                 @font-face {
                     font-family: "Calibri";
-                    src: url("' . $calibriBold . '") format("truetype");
+                    src: url("'.$calibriBold.'") format("truetype");
                     font-weight: bold;
                     font-style: normal;
                 }
                 @font-face {
                     font-family: "Calibri";
-                    src: url("' . $calibriItalic . '") format("truetype");
+                    src: url("'.$calibriItalic.'") format("truetype");
                     font-weight: normal;
                     font-style: italic;
                 }
                 @font-face {
                     font-family: "Calibri";
-                    src: url("' . $calibriBoldItalic . '") format("truetype");
+                    src: url("'.$calibriBoldItalic.'") format("truetype");
                     font-weight: bold;
                     font-style: italic;
                 }
                 @font-face {
                     font-family: "Calibri";
-                    src: url("' . $calibriLight . '") format("truetype");
+                    src: url("'.$calibriLight.'") format("truetype");
                     font-weight: 300;
                     font-style: normal;
                 }
                 @font-face {
                     font-family: "Calibri";
-                    src: url("' . $calibriLightItalic . '") format("truetype");
+                    src: url("'.$calibriLightItalic.'") format("truetype");
                     font-weight: 300;
                     font-style: italic;
                 }
@@ -467,12 +470,11 @@ class PdfTemplateController extends Controller
             </style>
         </head>
         <body>
-            ' . $bodyHtml . '
+            '.$bodyHtml.'
         </body>
         </html>
         ';
     }
-
 
     /**
      * Generate and download PDF.
@@ -496,18 +498,18 @@ class PdfTemplateController extends Controller
         foreach ($validatedData as $varName => $varValue) {
             $type = $variablesDef[$varName]['type'] ?? 'text';
             $formattedValue = $type === 'textarea' ? nl2br(e($varValue)) : e($varValue);
-            $htmlContent = preg_replace('/\{\{\s*' . preg_quote($varName, '/') . '\s*\}\}/', $formattedValue, $htmlContent);
+            $htmlContent = preg_replace('/\{\{\s*'.preg_quote($varName, '/').'\s*\}\}/', $formattedValue, $htmlContent);
         }
 
         // Embed images as base64 so Dompdf can render them
         $htmlContent = $this->embedImages($htmlContent);
 
         $pdf = Pdf::loadHTML($this->buildDocument($htmlContent))
-                  ->setPaper('A4', 'portrait')
-                  ->setOption('isRemoteEnabled', true)
-                  ->setOption('isHtml5ParserEnabled', true);
+            ->setPaper('A4', 'portrait')
+            ->setOption('isRemoteEnabled', true)
+            ->setOption('isHtml5ParserEnabled', true);
 
-        return $pdf->download(slugify($pdfTemplate->name) . '_' . time() . '.pdf');
+        return $pdf->download(slugify($pdfTemplate->name).'_'.time().'.pdf');
     }
 
     /**
@@ -521,9 +523,9 @@ class PdfTemplateController extends Controller
         $htmlContent = $pdfTemplate->content;
         foreach ($variablesDef as $varName => $def) {
             $value = $request->input($varName, '');
-            $type  = $def['type'] ?? 'text';
+            $type = $def['type'] ?? 'text';
             $formattedValue = $type === 'textarea' ? nl2br(e($value)) : e($value);
-            $htmlContent = preg_replace('/\{\{\s*' . preg_quote($varName, '/') . '\s*\}\}/', $formattedValue, $htmlContent);
+            $htmlContent = preg_replace('/\{\{\s*'.preg_quote($varName, '/').'\s*\}\}/', $formattedValue, $htmlContent);
         }
 
         // Highlight any unfilled placeholders in blue
@@ -533,9 +535,9 @@ class PdfTemplateController extends Controller
         $htmlContent = $this->embedImages($htmlContent);
 
         $pdf = Pdf::loadHTML($this->buildDocument($htmlContent))
-                  ->setPaper('A4', 'portrait')
-                  ->setOption('isRemoteEnabled', true)
-                  ->setOption('isHtml5ParserEnabled', true);
+            ->setPaper('A4', 'portrait')
+            ->setOption('isRemoteEnabled', true)
+            ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->stream('preview.pdf');
     }
@@ -551,17 +553,17 @@ class PdfTemplateController extends Controller
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+
             // Ensure public/uploads directory exists
-            if (!file_exists(public_path('uploads'))) {
+            if (! file_exists(public_path('uploads'))) {
                 mkdir(public_path('uploads'), 0755, true);
             }
 
             $file->move(public_path('uploads'), $filename);
 
             return response()->json([
-                'location' => asset('uploads/' . $filename)
+                'location' => asset('uploads/'.$filename),
             ]);
         }
 
@@ -589,9 +591,9 @@ class PdfTemplateController extends Controller
         $htmlContent = $this->embedImages($htmlContent);
 
         $pdf = Pdf::loadHTML($this->buildDocument($htmlContent))
-                  ->setPaper('A4', 'portrait')
-                  ->setOption('isRemoteEnabled', true)
-                  ->setOption('isHtml5ParserEnabled', true);
+            ->setPaper('A4', 'portrait')
+            ->setOption('isRemoteEnabled', true)
+            ->setOption('isHtml5ParserEnabled', true);
 
         return $pdf->stream('preview.pdf');
     }

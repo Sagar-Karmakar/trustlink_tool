@@ -1,7 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FileText, FolderGit2, LayoutGrid, Users, Share2, Megaphone } from 'lucide-react';
+import {
+    FileText,
+    LayoutGrid,
+    Users,
+    Share2,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {

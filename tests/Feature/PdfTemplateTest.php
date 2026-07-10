@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use App\Models\PdfTemplate;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -93,7 +94,7 @@ test('all authenticated users can fill and generate pdf', function () {
 
 test('admin can upload image for templates', function () {
     $admin = User::factory()->create(['role' => 'admin']);
-    
+
     Storage::fake('public');
     $file = UploadedFile::fake()->image('document_logo.jpg');
 
@@ -103,15 +104,15 @@ test('admin can upload image for templates', function () {
 
     $response->assertStatus(200);
     $response->assertJsonStructure(['location']);
-    
+
     $location = $response->json('location');
     $this->assertStringContainsString('/uploads/', $location);
-    
+
     $basename = basename($location);
-    $this->assertFileExists(public_path('uploads/' . $basename));
-    
+    $this->assertFileExists(public_path('uploads/'.$basename));
+
     // Clean up file
-    @unlink(public_path('uploads/' . $basename));
+    @unlink(public_path('uploads/'.$basename));
 });
 
 test('admin can request dynamic template visual preview', function () {
@@ -181,10 +182,10 @@ test('creating template with category name registers or links it correctly', fun
 test('searching categories returns correct autocomplete suggestions', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $user = User::factory()->create(['role' => 'user']);
-    
+
     // Create test categories
-    \App\Models\Category::firstOrCreate(['name' => 'Financial Invoices', 'slug' => 'financial-invoices']);
-    \App\Models\Category::firstOrCreate(['name' => 'Legal Contracts', 'slug' => 'legal-contracts']);
+    Category::firstOrCreate(['name' => 'Financial Invoices', 'slug' => 'financial-invoices']);
+    Category::firstOrCreate(['name' => 'Legal Contracts', 'slug' => 'legal-contracts']);
 
     // Admin can search when query >= 3 chars
     $response = $this->actingAs($admin)->get('/pdf-templates/categories/search?query=Fin');
@@ -201,12 +202,12 @@ test('searching categories returns correct autocomplete suggestions', function (
 
 test('listing templates under specific category', function () {
     $user = User::factory()->create(['role' => 'user']);
-    $category = \App\Models\Category::firstOrCreate(['name' => 'Contracts', 'slug' => 'contracts']);
+    $category = Category::firstOrCreate(['name' => 'Contracts', 'slug' => 'contracts']);
     $template = PdfTemplate::create([
         'name' => 'NDAs Template',
         'content' => '<h1>NDA</h1>',
         'variables' => [],
-        'category_id' => $category->id
+        'category_id' => $category->id,
     ]);
 
     // View categories landing page
@@ -217,4 +218,3 @@ test('listing templates under specific category', function () {
     $responseFilter = $this->actingAs($user)->get('/pdf-templates?category=contracts');
     $responseFilter->assertStatus(200);
 });
-
