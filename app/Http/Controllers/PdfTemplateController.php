@@ -251,6 +251,15 @@ class PdfTemplateController extends Controller
                     $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
                 }
 
+                // Strategy D: Strip combinations of /public/storage/, /storage/app/public/, or /storage/
+                $cleanSubPath = preg_replace('/^(?:public\/)?storage\/(?:app\/public\/)?/i', '', ltrim($path, '/'));
+                if ($cleanSubPath !== ltrim($path, '/')) {
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.$cleanSubPath;
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.$cleanSubPath;
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.$cleanSubPath;
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.$cleanSubPath;
+                }
+
                 // Clean paths and test
                 foreach (array_unique($pathsToTest) as $testPath) {
                     $testPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $testPath);
