@@ -238,7 +238,20 @@ class PdfTemplateController extends Controller
                 $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
 
                 if (file_exists($filePath) && is_readable($filePath)) {
-                    $mimeType = mime_content_type($filePath);
+                    $mimeType = null;
+                    if (function_exists('mime_content_type')) {
+                        $mimeType = @mime_content_type($filePath);
+                    }
+                    if (!$mimeType) {
+                        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                        $mimeType = match ($ext) {
+                            'png' => 'image/png',
+                            'gif' => 'image/gif',
+                            'webp' => 'image/webp',
+                            default => 'image/jpeg',
+                        };
+                    }
+
                     $fileData = @file_get_contents($filePath);
                     if ($fileData !== false) {
                         $base64 = base64_encode($fileData);
