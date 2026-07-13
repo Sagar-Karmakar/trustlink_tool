@@ -45,6 +45,7 @@ export default function ShareableContentShow({
 }: ShowProps) {
     const [isCopying, setIsCopying] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [copiedWhatsAppText, setCopiedWhatsAppText] = useState(false);
 
     // Helper to strip HTML tags for plain text copies
     const stripHtml = (html: string | null) => {
@@ -302,94 +303,7 @@ return '';
         }
     };
 
-    const handleCopyAllForWhatsApp = async () => {
-        const plainText = htmlToWhatsApp(contentItem.content);
 
-        // For WhatsApp share, copy the PNG image and plain-text (without rich HTML format)
-        if (navigator.clipboard && window.isSecureContext) {
-            try {
-                if (!contentItem.image_path) {
-                    await navigator.clipboard.write([
-                        new ClipboardItem({
-                            'text/plain': new Blob([plainText], {
-                                type: 'text/plain',
-                            }),
-                        }),
-                    ]);
-
-                    return;
-                }
-
-                const response = await fetch(contentItem.image_path);
-
-                if (!response.ok) {
-throw new Error('Failed to fetch image');
-}
-
-                const originalBlob = await response.blob();
-
-                let pngBlob = originalBlob;
-
-                if (originalBlob.type !== 'image/png') {
-                    pngBlob = await new Promise<Blob>((resolve, reject) => {
-                        const img = new Image();
-                        img.crossOrigin = 'anonymous';
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.naturalWidth;
-                            canvas.height = img.naturalHeight;
-                            const ctx = canvas.getContext('2d');
-
-                            if (ctx) {
-                                ctx.drawImage(img, 0, 0);
-                                canvas.toBlob((blob) => {
-                                    if (blob) {
-resolve(blob);
-} else {
-reject(
-                                            new Error(
-                                                'Canvas conversion to PNG failed',
-                                            ),
-                                        );
-}
-                                }, 'image/png');
-                            } else {
-                                reject(
-                                    new Error('Failed to get canvas context'),
-                                );
-                            }
-                        };
-                        img.onerror = () =>
-                            reject(
-                                new Error(
-                                    'Failed to load image for conversion',
-                                ),
-                            );
-                        img.src = contentItem.image_path!;
-                    });
-                }
-
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': pngBlob,
-                        'text/plain': new Blob([plainText], {
-                            type: 'text/plain',
-                        }),
-                    }),
-                ]);
-
-                return;
-            } catch (err) {
-                console.warn(
-                    'Clipboard write failed for WhatsApp share helper, trying fallback...',
-                    err,
-                );
-            }
-        }
-
-        // Fallback: Copy plain text
-        fallbackCopyText(plainText);
-    };
 
     const handleCopyImageOnly = async () => {
         if (!contentItem.image_path) {
@@ -555,14 +469,25 @@ return;
     };
 
     const handleShareWhatsApp = async () => {
-        // Attempt plain-text + image copy operation (no HTML formatting)
-        await handleCopyAllForWhatsApp();
-
         const plainText = htmlToWhatsApp(contentItem.content);
         const textMessage = `${contentItem.title}\n\n${plainText}\n\nView details: ${getShareUrl()}`;
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textMessage)}`;
 
-        window.open(whatsappUrl, '_blank');
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(textMessage);
+                toast.success('WhatsApp formatted text copied!');
+                setCopiedWhatsAppText(true);
+                setTimeout(() => setCopiedWhatsAppText(false), 2050);
+
+                return;
+            } catch (err) {
+                console.error('Failed to copy WhatsApp text:', err);
+            }
+        }
+
+        fallbackCopyText(textMessage, 'WhatsApp formatted text copied!');
+        setCopiedWhatsAppText(true);
+        setTimeout(() => setCopiedWhatsAppText(false), 2050);
     };
 
     // Dark theme inline style overrides to force pasted HTML contents (like Word pastes)
@@ -789,25 +714,23 @@ return;
                                     onClick={handleShareWhatsApp}
                                     className="w-full transform gap-2 rounded-xl border-0 bg-gradient-to-r from-green-600 to-emerald-600 py-6 text-sm font-semibold text-white shadow-md shadow-green-500/10 transition-all duration-200 hover:from-green-500 hover:to-emerald-500 active:scale-98 dark:shadow-green-950/20"
                                 >
-                                    <MessageSquare className="h-4.5 w-4.5 fill-white" />
-                                    Share to WhatsApp
+                                    {copiedWhatsAppText ? (
+                                        <Check className="h-4.5 w-4.5" />
+                                    ) : (
+                                        <MessageSquare className="h-4.5 w-4.5 fill-white" />
+                                    )}
+                                    {copiedWhatsAppText ? 'Copied WhatsApp Text!' : 'Copy WhatsApp Text'}
                                 </Button>
                             </div>
 
-                            {/* WhatsApp Web Tip Callout */}
+                            {/* WhatsApp Tip Callout */}
                             <div className="dark:border-blue-550/20 flex items-start gap-2.5 rounded-xl border border-blue-500/10 bg-blue-500/5 p-3 text-xs leading-normal text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
                                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                                 <div>
                                     <span className="font-semibold">
-                                        WhatsApp Web Tip:
+                                        WhatsApp Tip:
                                     </span>{' '}
-                                    Sharing to WhatsApp pre-fills the plain text
-                                    content. You can paste (
-                                    <kbd className="rounded bg-blue-500/10 px-1 font-mono text-[10px] dark:bg-blue-500/20">
-                                        Ctrl+V
-                                    </kbd>
-                                    ) directly inside the opened chat window to
-                                    attach the image as well.
+                                    Copies the text with bold/italic formatting tags directly to your clipboard. You can paste (<kbd className="rounded bg-blue-500/10 px-1 font-mono text-[10px] dark:bg-blue-500/20">Ctrl+V</kbd>) inside WhatsApp to share it.
                                 </div>
                             </div>
                         </div>
