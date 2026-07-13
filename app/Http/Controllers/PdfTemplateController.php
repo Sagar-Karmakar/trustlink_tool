@@ -194,12 +194,17 @@ class PdfTemplateController extends Controller
         $publicDir = public_path();
         $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? null;
 
-        // Establish possible public directory roots to search (useful on Hostinger public_html setups)
+        // Establish possible public/storage directory roots to search (useful on Hostinger setups)
         $searchDirs = array_filter([
             $publicDir,
             $docRoot,
             base_path('public_html'),
             base_path('public'),
+            storage_path('app/public'),
+            storage_path('app'),
+            storage_path(),
+            base_path('storage'),
+            base_path(),
         ]);
 
         // Wrap in a div so DOMDocument doesn't add <html>/<body> wrappers
@@ -226,37 +231,69 @@ class PdfTemplateController extends Controller
 
             $base64 = null;
             $mimeType = null;
+            $filePath = null;
 
-            // 1. Try local filesystem paths across all possible directories
+            // 1. Try local filesystem paths across all possible directories using multiple strategies
             foreach ($searchDirs as $dir) {
-                $filePath = null;
+                $pathsToTest = [];
+
+                // Strategy A: Preserve the URL path directly (e.g. public_path() + /storage/file.png)
+                $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+
+                // Strategy B: If it contains /uploads/, strip the prefix before uploads/
                 if (preg_match('/(?:^|\/)uploads\/(.+)$/i', $path, $matches)) {
-                    $filePath = $dir.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
-                } else {
-                    $filePath = $dir.DIRECTORY_SEPARATOR.ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
                 }
-                $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
 
-                if (file_exists($filePath) && is_readable($filePath)) {
-                    $mimeType = null;
-                    if (function_exists('mime_content_type')) {
-                        $mimeType = @mime_content_type($filePath);
-                    }
-                    if (!$mimeType) {
-                        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-                        $mimeType = match ($ext) {
-                            'png' => 'image/png',
-                            'gif' => 'image/gif',
-                            'webp' => 'image/webp',
-                            default => 'image/jpeg',
-                        };
-                    }
+                // Strategy C: If it contains /storage/, strip the /storage/ prefix (e.g. storage_path('app/public') + file.png)
+                if (preg_match('/(?:^|\/)storage\/(.+)$/i', $path, $matches)) {
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
+                    $pathsToTest[] = $dir.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
+                }
 
-                    $fileData = @file_get_contents($filePath);
-                    if ($fileData !== false) {
-                        $base64 = base64_encode($fileData);
-                        break;
+                // Clean paths and test
+                foreach (array_unique($pathsToTest) as $testPath) {
+                    $testPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $testPath);
+                    $exists = file_exists($testPath);
+                    $readable = $exists ? is_readable($testPath) : false;
+
+                    // Log testing attempt for diagnostics
+                    \Log::info('[PDF embedImages] Testing path', [
+                        'src' => $src,
+                        'test_path' => $testPath,
+                        'exists' => $exists ? 'YES' : 'NO',
+                        'readable' => $readable ? 'YES' : 'NO',
+                    ]);
+
+                    if ($exists && $readable) {
+                        $filePath = $testPath;
+                        break 2; // Found a match, break both loops
                     }
+                }
+            }
+
+            if ($filePath) {
+                $mimeType = null;
+                if (function_exists('mime_content_type')) {
+                    $mimeType = @mime_content_type($filePath);
+                }
+                if (!$mimeType) {
+                    $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                    $mimeType = match ($ext) {
+                        'png' => 'image/png',
+                        'gif' => 'image/gif',
+                        'webp' => 'image/webp',
+                        default => 'image/jpeg',
+                    };
+                }
+
+                $fileData = @file_get_contents($filePath);
+                if ($fileData !== false) {
+                    $base64 = base64_encode($fileData);
+                    \Log::info('[PDF embedImages] Successfully read and encoded file', [
+                        'file_path' => $filePath,
+                        'mime_type' => $mimeType,
+                    ]);
                 }
             }
 
