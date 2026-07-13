@@ -192,6 +192,15 @@ class PdfTemplateController extends Controller
         }
 
         $publicDir = public_path();
+        $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? null;
+
+        // Establish possible public directory roots to search (useful on Hostinger public_html setups)
+        $searchDirs = array_filter([
+            $publicDir,
+            $docRoot,
+            base_path('public_html'),
+            base_path('public'),
+        ]);
 
         // Wrap in a div so DOMDocument doesn't add <html>/<body> wrappers
         $wrapped = '<div id="__wrap__">'.$html.'</div>';
@@ -215,23 +224,26 @@ class PdfTemplateController extends Controller
                 continue;
             }
 
-            // 1. Try local filesystem path
-            $filePath = null;
-            if (preg_match('/\/uploads\/(.+)$/i', $path, $matches)) {
-                $filePath = $publicDir.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
-            } else {
-                $filePath = $publicDir.DIRECTORY_SEPARATOR.ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
-            }
-            $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
-
             $base64 = null;
             $mimeType = null;
 
-            if (file_exists($filePath) && is_readable($filePath)) {
-                $mimeType = mime_content_type($filePath);
-                $fileData = @file_get_contents($filePath);
-                if ($fileData !== false) {
-                    $base64 = base64_encode($fileData);
+            // 1. Try local filesystem paths across all possible directories
+            foreach ($searchDirs as $dir) {
+                $filePath = null;
+                if (preg_match('/(?:^|\/)uploads\/(.+)$/i', $path, $matches)) {
+                    $filePath = $dir.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $matches[1]);
+                } else {
+                    $filePath = $dir.DIRECTORY_SEPARATOR.ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+                }
+                $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
+
+                if (file_exists($filePath) && is_readable($filePath)) {
+                    $mimeType = mime_content_type($filePath);
+                    $fileData = @file_get_contents($filePath);
+                    if ($fileData !== false) {
+                        $base64 = base64_encode($fileData);
+                        break;
+                    }
                 }
             }
 
