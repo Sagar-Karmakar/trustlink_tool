@@ -6,8 +6,8 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
+export default defineConfig(({ command }) => {
+    const plugins = [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
@@ -24,8 +24,18 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
-    ],
+    ];
+
+    // Only run wayfinder during development (serve) to avoid Device Guard policy blocks during npm run build
+    if (command === 'serve') {
+        plugins.push(
+            wayfinder({
+                formVariants: true,
+            })
+        );
+    }
+
+    return {
+        plugins,
+    };
 });

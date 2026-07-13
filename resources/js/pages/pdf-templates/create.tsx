@@ -193,7 +193,7 @@ export default function CreateTemplate({
             <div className="pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full bg-blue-600/15 blur-3xl sm:h-96 sm:w-96 dark:bg-blue-600/10" />
             <div className="pointer-events-none absolute top-1/2 -right-16 h-64 w-64 rounded-full bg-sky-500/15 blur-3xl sm:h-96 sm:w-96 dark:bg-sky-500/10" />
 
-            <div className="relative z-10 mx-auto max-w-5xl space-y-6">
+            <div className="relative z-10 mx-auto max-w-7xl space-y-6">
                 {/* Back Button and Heading */}
                 <div className="flex items-center gap-4">
                     <Link
@@ -303,7 +303,7 @@ export default function CreateTemplate({
                                     key={resolvedAppearance}
                                     tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"
                                     init={{
-                                        height: 450,
+                                        height: 800,
                                         menubar: false,
                                         branding: false,
                                         skin: isDark ? 'oxide-dark' : 'oxide',
@@ -331,13 +331,54 @@ export default function CreateTemplate({
                                             'paste',
                                         ],
                                         toolbar:
-                                            'undo redo | blocks | ' +
-                                            'bold italic forecolor | alignleft aligncenter ' +
-                                            'alignright alignjustify | bullist numlist | ' +
-                                            'table image code | removeformat',
-                                        content_style: isDark
-                                            ? 'body { font-family:Helvetica,Arial,sans-serif; font-size:13px; color: #e4e4e7; background-color: #09090b; }'
-                                            : 'body { font-family:Helvetica,Arial,sans-serif; font-size:13px; color: #09090b; background-color: #ffffff; }',
+                                            'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | link image table | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | removeformat code',
+                                        font_family_formats: 'Calibri=Calibri; Arial=arial,helvetica,sans-serif; Courier New=courier new,courier,monospace; Georgia=georgia,palatino; Helvetica=helvetica; Tahoma=tahoma,arial,helvetica,sans-serif; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva',
+                                        font_size_formats: '8px 9px 10px 11px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 72px',
+                                        content_style: `
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibri.ttf') format('truetype');
+                                                font-weight: normal;
+                                                font-style: normal;
+                                            }
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibrib.ttf') format('truetype');
+                                                font-weight: bold;
+                                                font-style: normal;
+                                            }
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibrii.ttf') format('truetype');
+                                                font-weight: normal;
+                                                font-style: italic;
+                                            }
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibriz.ttf') format('truetype');
+                                                font-weight: bold;
+                                                font-style: italic;
+                                            }
+                                            body {
+                                                font-family: 'Calibri', Helvetica, Arial, sans-serif;
+                                                font-size: 11px;
+                                                color: ${isDark ? '#e4e4e7' : '#09090b'};
+                                                background-color: ${isDark ? '#18181b' : '#f4f4f5'};
+                                                margin: 0;
+                                                padding: 12px;
+                                            }
+                                            .mce-content-body {
+                                                max-width: 210mm;
+                                                min-height: 297mm;
+                                                background-color: ${isDark ? '#09090b' : '#ffffff'} !important;
+                                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                                                margin: 16px auto !important;
+                                                padding: 20mm 18mm 20mm 18mm !important;
+                                                box-sizing: border-box;
+                                                border-radius: 4px;
+                                                border: 1px solid ${isDark ? '#27272a' : '#e4e4e7'};
+                                            }
+                                        `,
                                         automatic_uploads: true,
                                         convert_urls: false,
                                         paste_as_text: false,
@@ -545,7 +586,7 @@ throw new Error(
                 open={showPreview}
                 onOpenChange={(open) => !open && setShowPreview(false)}
             >
-                <DialogContent className="flex h-[80vh] w-[95vw] max-w-4xl flex-col rounded-2xl border border-white/20 bg-white/95 p-4 shadow-2xl backdrop-blur-xl sm:h-[85vh] sm:p-6 dark:border-zinc-800/40 dark:bg-zinc-950/95">
+                <DialogContent className="flex h-[85vh] w-[95vw] max-w-5xl flex-col rounded-2xl border border-white/20 bg-white/95 p-4 shadow-2xl backdrop-blur-xl sm:h-[90vh] sm:p-6 dark:border-zinc-800/40 dark:bg-zinc-950/95">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-zinc-100">
                             PDF Visual Preview

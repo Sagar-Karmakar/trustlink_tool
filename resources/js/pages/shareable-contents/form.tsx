@@ -351,13 +351,41 @@ export default function ShareableContentForm({
                                             'paste',
                                         ],
                                         toolbar:
-                                            'undo redo | blocks | ' +
-                                            'bold italic underline forecolor | alignleft aligncenter ' +
-                                            'alignright alignjustify | bullist numlist | ' +
-                                            'table image code | removeformat',
-                                        content_style: isDark
-                                            ? 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; color: #e4e4e7; background-color: #09090b; }'
-                                            : 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; color: #09090b; background-color: #ffffff; }',
+                                            'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | link image table | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | removeformat code',
+                                        font_family_formats: 'Calibri=Calibri; Arial=arial,helvetica,sans-serif; Courier New=courier new,courier,monospace; Georgia=georgia,palatino; Helvetica=helvetica; Tahoma=tahoma,arial,helvetica,sans-serif; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva',
+                                        font_size_formats: '8px 9px 10px 11px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 72px',
+                                        content_style: `
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibri.ttf') format('truetype');
+                                                font-weight: normal;
+                                                font-style: normal;
+                                            }
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibrib.ttf') format('truetype');
+                                                font-weight: bold;
+                                                font-style: normal;
+                                            }
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibrii.ttf') format('truetype');
+                                                font-weight: normal;
+                                                font-style: italic;
+                                            }
+                                            @font-face {
+                                                font-family: 'Calibri';
+                                                src: url('/fonts/calibriz.ttf') format('truetype');
+                                                font-weight: bold;
+                                                font-style: italic;
+                                            }
+                                            body {
+                                                font-family: 'Calibri', Helvetica, Arial, sans-serif;
+                                                font-size: 14px;
+                                                color: ${isDark ? '#e4e4e7' : '#09090b'};
+                                                background-color: ${isDark ? '#09090b' : '#ffffff'};
+                                            }
+                                        `,
                                         automatic_uploads: true,
                                         convert_urls: false,
                                         paste_as_text: false,
